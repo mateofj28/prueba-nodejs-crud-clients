@@ -13,15 +13,27 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Obtener todos los clientes (Read)
+// Get all clients or filter by email
 router.get('/', async (req, res) => {
+  const { email } = req.query;  // Get the query parameter 'email' if provided
+
   try {
-    const clientes = await Client.find();
-    res.json(clientes);
+    let clients;
+
+    if (email) {
+      // If the email is in the query params, filter by email
+      clients = await Client.find({ email: new RegExp(email, 'i') });
+    } else {
+      // If no email is provided, return all clients
+      clients = await Client.find();
+    }
+
+    res.json(clients);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener los clientes', error });
+    res.status(500).json({ message: 'Error retrieving clients', error });
   }
 });
+
 
 // Obtener un cliente por ID (Read)
 router.get('/:id', async (req, res) => {
