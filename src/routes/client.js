@@ -13,26 +13,34 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get all clients or filter by email
+// Get all clients or filter by exact email
 router.get('/', async (req, res) => {
-  const { email } = req.query;  // Get the query parameter 'email' if provided
+  const { email } = req.query;
 
   try {
-    let clients;
+    // Obtener todos los clientes
+    const users = await Client.find();
 
+    // Filtrar por email si se proporciona
     if (email) {
-      // If the email is in the query params, filter by email
-      clients = await Client.find({ email: new RegExp(email, 'i') });
-    } else {
-      // If no email is provided, return all clients
-      clients = await Client.find();
+      const user = users.find(user => user.email === email);
+
+      if (user) {
+        return res.json(user); // Retornar el usuario encontrado
+      } else {
+        return res.status(404).json({ message: 'User not found' }); // Manejar el caso cuando no se encuentra el usuario
+      }
     }
 
-    res.json(clients);
-  } catch (error) {
-    res.status(500).json({ message: 'Error retrieving clients', error });
+    // Retornar todos los usuarios si no se proporciona email
+    res.json(users);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error retrieving users' }); // Mensaje de error más claro
   }
 });
+
 
 
 // Obtener un cliente por ID (Read)
